@@ -1,7 +1,16 @@
-import React from "react";
+"use client";
+import { signIn } from "next-auth/react";
 
-const SignInPage = () => {
-  return <div>SignInPage</div>;
-};
+export default function SignIn() {
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    await signIn("google", { callbackUrl: "/" });
+  };
 
-export default SignInPage;
+  return (
+    <div>
+      <h1>Sign in</h1>
+      <button onClick={handleSubmit}>Sign in with Google</button>
+    </div>
+  );
+}

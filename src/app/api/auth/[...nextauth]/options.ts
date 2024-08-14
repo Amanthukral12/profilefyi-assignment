@@ -13,6 +13,12 @@ const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/signin",
   },
+  callbacks: {
+    async session({ session, user }) {
+      session.user.id = user.id;
+      return session;
+    },
+  },
 };
 
 export default authOptions;
