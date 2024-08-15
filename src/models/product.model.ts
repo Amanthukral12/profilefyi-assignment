@@ -1,7 +1,7 @@
 import { Document } from "mongodb";
 import mongoose, { Schema, Types } from "mongoose";
 
-export interface Product extends Document {
+export interface IProduct extends Document {
   user: Types.ObjectId;
   name: string;
   image: string;
@@ -9,7 +9,7 @@ export interface Product extends Document {
   countInStock: number;
 }
 
-const productSchema = new Schema<Product>(
+const productSchema = new Schema<IProduct>(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -39,6 +39,6 @@ const productSchema = new Schema<Product>(
 );
 
 const Product =
-  mongoose.models.Product || mongoose.model<Product>("Product", productSchema);
+  mongoose.models.Product || mongoose.model<IProduct>("Product", productSchema);
 
 export default Product;
