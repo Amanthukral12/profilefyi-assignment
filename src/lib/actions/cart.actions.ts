@@ -1,9 +1,12 @@
 "use server";
-import { IProduct } from "@/models/product.model";
+import Product, { IProduct } from "@/models/product.model";
 import { connectToDatabase } from "../database/mongoose";
 import Cart from "@/models/cart.model";
 
-export function combineCarts(localCart: IProduct[], databaseCart: IProduct[]) {
+export async function combineCarts(
+  localCart: IProduct[],
+  databaseCart: IProduct[]
+) {
   const combinedCart = [...localCart];
 
   databaseCart.forEach((item) => {
@@ -11,7 +14,7 @@ export function combineCarts(localCart: IProduct[], databaseCart: IProduct[]) {
       (cartItem) => cartItem._id === item._id
     );
     if (existingItem) {
-      existingItem.qty += item.qty;
+      existingItem.quantity += item.quantity;
     } else {
       combinedCart.push(item);
     }
@@ -20,12 +23,39 @@ export function combineCarts(localCart: IProduct[], databaseCart: IProduct[]) {
   return combinedCart;
 }
 
+export async function calculateCartTotal(cartItems: any) {
+  try {
+    const subTotal = Number(
+      cartItems.reduce((sum: number, cartItem: any) => {
+        const discountedPrice =
+          cartItem.price -
+          cartItem.price * (cartItem.product.discountPercentage / 100);
+
+        return sum + discountedPrice * cartItem.quantity;
+      }, 0)
+    );
+
+    const fixedDiscount = subTotal * 0.1;
+    const totalPrice = subTotal - fixedDiscount;
+
+    return {
+      subTotal,
+      fixedDiscount,
+      totalPrice,
+    } as { subTotal: number; fixedDiscount: number; totalPrice: number };
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 export async function getCartItemsFromDatabase(userId: string) {
   try {
     await connectToDatabase();
-    const cartItems = Cart.findOne({ userId: userId });
-    return JSON.parse(JSON.stringify(cartItems));
-  } catch (error) {}
+    const cartItems = await Cart.findOne({ user: userId });
+    return cartItems;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 export async function addItemsToCart(
@@ -35,13 +65,18 @@ export async function addItemsToCart(
 ) {
   try {
     await connectToDatabase();
-    const cart = await getCartItemsFromDatabase(userId);
+
+    let cart = await Cart.findOne({ user: userId }).populate(
+      "cartItems.product"
+    );
+
     if (cart) {
-      const existingItemIndex = cart.cartItems.findIndex(
-        (cartItem: any) => cartItem.product === item._id
-      );
+      const existingItemIndex = cart.cartItems.findIndex((cartItem: any) => {
+        return cartItem.product._id.toString() === item._id.toString();
+      });
+
       if (existingItemIndex >= 0) {
-        cart.cartItems[existingItemIndex].qty += quantity;
+        cart.cartItems[existingItemIndex].quantity += quantity;
       } else {
         cart.cartItems.push({
           name: item.name,
@@ -51,10 +86,27 @@ export async function addItemsToCart(
           product: item._id,
         });
       }
+      await cart.populate("cartItems.product");
+
+      const { subTotal, fixedDiscount, totalPrice } = (await calculateCartTotal(
+        cart.cartItems
+      )) as { subTotal: number; fixedDiscount: number; totalPrice: number };
+
+      cart.subTotal = subTotal;
+      cart.fixedDiscount = fixedDiscount;
+      cart.totalPrice = totalPrice;
+
       await cart.save();
     } else {
+      const product = await Product.findById({ _id: item._id });
+      const discountedPrice = product.calculateDiscountedPrice();
+      const subTotal = discountedPrice * quantity;
+
+      const fixedDiscount = subTotal * 0.1;
+
+      const totalPrice = subTotal - fixedDiscount;
       await Cart.create({
-        userId: userId,
+        user: userId,
         cartItems: [
           {
             name: item.name,
@@ -64,6 +116,9 @@ export async function addItemsToCart(
             product: item._id,
           },
         ],
+        subTotal: subTotal,
+        fixedDiscount: fixedDiscount,
+        totalPrice: totalPrice,
       });
     }
   } catch (error) {
@@ -86,7 +141,7 @@ export async function updateCart(
       (cartItem: any) => cartItem.product === itemId
     );
     if (existingItemIndex >= 0) {
-      cart.cartItems[existingItemIndex].qty = quantity;
+      cart.cartItems[existingItemIndex].quantity = quantity;
     }
     await cart.save();
   } catch (error) {

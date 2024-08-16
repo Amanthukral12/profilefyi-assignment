@@ -59,17 +59,10 @@ const cartSchema = new Schema<ICart>(
       required: true,
       default: 0,
     },
-    discounts: {
-      fixed: {
-        type: Number,
-        required: true,
-        default: 0,
-      },
-      percentage: {
-        type: Number,
-        required: true,
-        default: 0,
-      },
+    fixedDiscount: {
+      type: Number,
+      required: true,
+      default: 0,
     },
     totalPrice: {
       type: Number,

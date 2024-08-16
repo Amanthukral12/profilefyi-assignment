@@ -7,6 +7,7 @@ export interface IProduct extends Document {
   image: string;
   price: number;
   countInStock: number;
+  discountPercentage: number;
 }
 
 const productSchema = new Schema<IProduct>(
@@ -32,6 +33,10 @@ const productSchema = new Schema<IProduct>(
     countInStock: {
       type: Number,
       required: [true, "Stock is required"],
+      default: 0,
+    },
+    discountPercentage: {
+      type: Number,
       default: 0,
     },
   },

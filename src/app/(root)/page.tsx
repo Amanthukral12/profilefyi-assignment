@@ -1,22 +1,14 @@
-"use client";
+import { getAllProducts } from "@/lib/actions/product.action";
+import ProductsPage from "@/components/ProductsPage";
 
-import { signOut, useSession } from "next-auth/react";
-import Link from "next/link";
+export default async function Home() {
+  const products = await getAllProducts();
 
-export default function Home() {
-  const { data: session } = useSession();
-  console.log(session);
   return (
     <main>
       Home Page
+      <ProductsPage products={products} />
       <br />
-      {session ? (
-        <>
-          <p onClick={() => signOut()}>Sign out</p>
-        </>
-      ) : (
-        <Link href="/signin">Sign in</Link>
-      )}
     </main>
   );
 }
