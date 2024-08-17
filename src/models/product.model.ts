@@ -43,6 +43,11 @@ const productSchema = new Schema<IProduct>(
   { timestamps: true }
 );
 
+productSchema.methods.calculateDiscountedPrice = function () {
+  const discountPrice = this.price * (this.discountPercentage / 100);
+  return Number(this.price - discountPrice);
+};
+
 const Product =
   mongoose.models.Product || mongoose.model<IProduct>("Product", productSchema);
 

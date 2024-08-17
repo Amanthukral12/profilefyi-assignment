@@ -13,10 +13,7 @@ export interface ICart extends Document {
     }
   ];
   subTotal: number;
-  discounts: {
-    fixed: number;
-    percentage: number;
-  };
+  fixedDiscount: number;
   totalPrice: number;
 }
 
