@@ -52,6 +52,7 @@ const Navbar = () => {
                   signOut();
                   localStorage.removeItem("cart");
                 }}
+                className="cursor-pointer"
               >
                 Sign out
               </p>
@@ -91,6 +92,7 @@ const Navbar = () => {
                     signOut();
                     localStorage.removeItem("cart");
                   }}
+                  className="cursor-pointer"
                 >
                   Sign out
                 </p>
