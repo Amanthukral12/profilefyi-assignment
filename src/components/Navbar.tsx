@@ -22,7 +22,7 @@ const Navbar = () => {
   return (
     <header className="mx-8 py-4">
       <div className="flex justify-between items-center flex-wrap">
-        <Link href={"/"} className="text-2xl">
+        <Link href={"/"} className="text-4xl">
           Teevolution
         </Link>
         <div className="hidden md:flex md:justify-between">
