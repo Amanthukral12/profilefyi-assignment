@@ -1,6 +1,9 @@
 "use client";
 import CartItem from "@/components/CartItem";
-import { getCartItemsFromDatabase } from "@/lib/actions/cart.actions";
+import {
+  addItemsToCart,
+  getCartItemsFromDatabase,
+} from "@/lib/actions/cart.actions";
 import { getLocalCartItems } from "@/lib/utils/cart";
 import { ICart } from "@/models/cart.model";
 import { useSession } from "next-auth/react";
@@ -14,8 +17,23 @@ const Cart = () => {
   useEffect(() => {
     const fetchCartItems = async () => {
       if (session) {
-        const items = await getCartItemsFromDatabase(session.user.id);
-        setCart(items);
+        const items = getLocalCartItems();
+        items.map((item: any) => {
+          const newProduct = {
+            _id: item.id,
+            user: session?.user.id,
+            name: item.name,
+            image: item.image,
+            price: item.price,
+            countInStock: item.countInStock,
+            discountPercentage: item.discountPercentage,
+          };
+
+          addItemsToCart(newProduct, item.quantity, session.user.id);
+        });
+        localStorage.removeItem("cartItems");
+        const databaseCart = await getCartItemsFromDatabase(session.user.id);
+        setCart(databaseCart);
       } else {
         const items = getLocalCartItems();
         setLocalCart(items);

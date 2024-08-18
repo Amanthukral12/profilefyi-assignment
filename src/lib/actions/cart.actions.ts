@@ -1,27 +1,7 @@
 "use server";
-import Product, { IProduct } from "@/models/product.model";
+import Product from "@/models/product.model";
 import { connectToDatabase } from "../database/mongoose";
 import Cart from "@/models/cart.model";
-
-export async function combineCarts(
-  localCart: IProduct[],
-  databaseCart: IProduct[]
-) {
-  const combinedCart = [...localCart];
-
-  databaseCart.forEach((item) => {
-    const existingItem = combinedCart.find(
-      (cartItem) => cartItem._id === item._id
-    );
-    if (existingItem) {
-      existingItem.quantity += item.quantity;
-    } else {
-      combinedCart.push(item);
-    }
-  });
-
-  return combinedCart;
-}
 
 export async function calculateCartTotal(cartItems: any) {
   try {
