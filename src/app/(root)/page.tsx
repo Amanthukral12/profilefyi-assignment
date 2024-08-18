@@ -6,9 +6,7 @@ export default async function Home() {
 
   return (
     <main>
-      Home Page
       <ProductsPage products={products} />
-      <br />
     </main>
   );
 }

@@ -42,13 +42,26 @@ const Product = ({ product }: { product: IProduct }) => {
   };
 
   return (
-    <div>
-      <Image src={product.image} alt={product.name} width={200} height={200} />
-      <p>{product.name}</p>
-      <p>
+    <div className="border rounded-lg py-4 px-2 shadow-lg flex flex-col items-center">
+      <Image
+        src={product.image}
+        alt={product.name}
+        width={300}
+        height={100}
+        quality={70}
+        priority={true}
+        className="object-cover mb-4 w-auto h-auto rounded-lg"
+      />
+      <p className="text-lg font-semibold mb-2 text-center">{product.name}</p>
+      <p className="text-xl font-bold mb-4">
         ${product.price - (product.price * product.discountPercentage) / 100}
       </p>
-      <button onClick={() => addToCartHandler(product)}>Add to Cart</button>
+      <button
+        onClick={() => addToCartHandler(product)}
+        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300"
+      >
+        Add to Cart
+      </button>
     </div>
   );
 };
