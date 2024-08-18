@@ -35,8 +35,9 @@ export async function calculateCartTotal(cartItems: any) {
       }, 0)
     );
 
-    const fixedDiscount = subTotal * 0.1;
-    const totalPrice = subTotal - fixedDiscount;
+    let fixedDiscount = subTotal * 0.1;
+    fixedDiscount = Number(fixedDiscount.toFixed(2));
+    let totalPrice = subTotal - fixedDiscount;
 
     return {
       subTotal,
@@ -138,7 +139,6 @@ export async function updateCart(
     let cart = await Cart.findOne({ user: userId }).populate(
       "cartItems.product"
     );
-    console.log(cart);
     if (!cart) {
       throw new Error("Cart not found");
     }
@@ -147,7 +147,7 @@ export async function updateCart(
     });
 
     if (existingItemIndex >= 0) {
-      cart.cartItems[existingItemIndex].quantity = quantity;
+      cart.cartItems[existingItemIndex].quantity += quantity;
     }
     await cart.populate("cartItems.product");
 
@@ -167,13 +167,21 @@ export async function updateCart(
 export async function deleteItemFromCart(userId: string, itemId: string) {
   try {
     await connectToDatabase();
-    const cart = await getCartItemsFromDatabase(userId);
+    let cart = await Cart.findOne({ user: userId });
     if (!cart) {
       throw new Error("Cart not found");
     }
     cart.cartItems = cart.cartItems.filter(
-      (cartItem: any) => cartItem.product !== itemId
+      (cartItem: any) => cartItem._id.toString() !== itemId.toString()
     );
+    await cart.populate("cartItems.product");
+    const { subTotal, fixedDiscount, totalPrice } = (await calculateCartTotal(
+      cart.cartItems
+    )) as { subTotal: number; fixedDiscount: number; totalPrice: number };
+
+    cart.subTotal = subTotal;
+    cart.fixedDiscount = fixedDiscount;
+    cart.totalPrice = totalPrice;
     await cart.save();
   } catch (error) {
     console.error(error);

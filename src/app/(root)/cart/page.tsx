@@ -4,11 +4,12 @@ import { getCartItemsFromDatabase } from "@/lib/actions/cart.actions";
 import { getLocalCartItems } from "@/lib/utils/cart";
 import { ICart } from "@/models/cart.model";
 import { useSession } from "next-auth/react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const Cart = () => {
   const { data: session } = useSession();
-  const [cart, setCart] = React.useState<ICart | {}>({});
+  const [cart, setCart] = useState<ICart | {}>({});
+  const [localCart, setLocalCart] = useState([]);
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -17,7 +18,7 @@ const Cart = () => {
         setCart(items);
       } else {
         const items = getLocalCartItems();
-        setCart(items);
+        setLocalCart(items);
       }
     };
     fetchCartItems();
@@ -25,11 +26,25 @@ const Cart = () => {
 
   return (
     <div>
-      {cart &&
-        (cart as ICart)?.cartItems &&
-        (cart as ICart)?.cartItems.map((item: any) => (
-          <CartItem key={item._id} item={item} userId={session?.user.id} />
-        ))}
+      {session
+        ? cart &&
+          (cart as ICart)?.cartItems &&
+          (cart as ICart)?.cartItems.map((item: any) => (
+            <CartItem
+              key={item._id}
+              item={item}
+              userId={session?.user.id}
+              setCart={setCart}
+            />
+          ))
+        : localCart.map((item: any) => (
+            <CartItem
+              key={item.id}
+              item={item}
+              userId={""}
+              setCart={setLocalCart}
+            />
+          ))}
     </div>
   );
 };

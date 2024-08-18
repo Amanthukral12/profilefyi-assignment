@@ -16,6 +16,7 @@ const Product = ({ product }: { product: IProduct }) => {
       image: product.image,
       price: product.price,
       discountPercentage: product.discountPercentage,
+      countInStock: product.countInStock,
     };
     {
       !session
