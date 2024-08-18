@@ -1,13 +1,23 @@
 "use client";
-import { addItemsToCart } from "@/lib/actions/cart.actions";
-import { addItemtoLocalCart } from "@/lib/utils/cart";
+import {
+  addItemsToCart,
+  getCartItemsFromDatabase,
+} from "@/lib/actions/cart.actions";
+import { addItemtoLocalCart, getLocalCartItems } from "@/lib/utils/cart";
+import { ICart } from "@/models/cart.model";
 import { IProduct } from "@/models/product.model";
+import { useCart } from "@/provider/CartProvider";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import React from "react";
 
 const Product = ({ product }: { product: IProduct }) => {
   const { data: session } = useSession();
+  const { setCart, setLocalCart } = useCart() as {
+    setCart: (cart: ICart | undefined) => void;
+    setLocalCart: (localCart: any[]) => void;
+  };
+
   const addToCartHandler = async (product: IProduct) => {
     const item = {
       id: product._id,
@@ -18,10 +28,16 @@ const Product = ({ product }: { product: IProduct }) => {
       discountPercentage: product.discountPercentage,
       countInStock: product.countInStock,
     };
-    {
-      !session
-        ? addItemtoLocalCart({ item })
-        : addItemsToCart(product, 1, session.user.id);
+
+    if (!session) {
+      addItemtoLocalCart({ item });
+      const items = getLocalCartItems();
+      setLocalCart(items);
+    } else {
+      addItemsToCart(product, 1, session.user.id);
+      const databaseCart = await getCartItemsFromDatabase(session.user.id);
+      localStorage.setItem("cart", JSON.stringify(databaseCart));
+      setCart(databaseCart);
     }
   };
 

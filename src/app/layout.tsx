@@ -7,6 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 import { getServerSession } from "next-auth";
 import authOptions from "./api/auth/[...nextauth]/options";
 import AuthProvider from "@/provider/AuthProvider";
+import { CartProvider } from "@/provider/CartProvider";
 export const metadata: Metadata = {
   title: "ProfileFyi-Assignment",
   description: "ProfileFyi-Assignment",
@@ -21,7 +22,9 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <AuthProvider session={session}>
-        <body className={inter.className}>{children}</body>
+        <CartProvider>
+          <body className={inter.className}>{children}</body>
+        </CartProvider>
       </AuthProvider>
     </html>
   );

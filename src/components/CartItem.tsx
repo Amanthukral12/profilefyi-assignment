@@ -26,6 +26,7 @@ const CartItem = ({
       await updateCart(userId, item._id, quantity);
       const updatedCart = await getCartItemsFromDatabase(userId);
       setCart(updatedCart);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
     } catch (error) {
       console.error(error);
     }
@@ -35,6 +36,7 @@ const CartItem = ({
       updateLocalCartquantity(item.id, quantity);
       const updatedCart = getLocalCartItems();
       setCart(updatedCart);
+      localStorage.setItem("cartItems", JSON.stringify(updatedCart));
     } catch (error) {
       console.log(error);
     }
@@ -44,6 +46,7 @@ const CartItem = ({
       removeItemFromLocalCart(item.id);
       const updatedCart = getLocalCartItems();
       setCart(updatedCart);
+      localStorage.setItem("cartItems", JSON.stringify(updatedCart));
     } catch (error) {
       console.log(error);
     }
@@ -53,6 +56,7 @@ const CartItem = ({
       await deleteItemFromCart(userId, item._id);
       const updatedCart = await getCartItemsFromDatabase(userId);
       setCart(updatedCart);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
     } catch (error) {
       console.log(error);
     }

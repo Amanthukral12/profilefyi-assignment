@@ -6,13 +6,18 @@ import {
 } from "@/lib/actions/cart.actions";
 import { getLocalCartItems } from "@/lib/utils/cart";
 import { ICart } from "@/models/cart.model";
+import { useCart } from "@/provider/CartProvider";
 import { useSession } from "next-auth/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 const Cart = () => {
   const { data: session } = useSession();
-  const [cart, setCart] = useState<ICart | {}>({});
-  const [localCart, setLocalCart] = useState([]);
+  const { cart, setCart, localCart, setLocalCart } = useCart() as {
+    cart: ICart | undefined;
+    setCart: (cart: ICart | undefined) => void;
+    localCart: any[];
+    setLocalCart: (localCart: any[]) => void;
+  };
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -31,8 +36,9 @@ const Cart = () => {
 
           addItemsToCart(newProduct, item.quantity, session.user.id);
         });
-        localStorage.removeItem("cartItems");
+        localStorage.setItem("cartItems", JSON.stringify([]));
         const databaseCart = await getCartItemsFromDatabase(session.user.id);
+        localStorage.setItem("cart", JSON.stringify(databaseCart));
         setCart(databaseCart);
       } else {
         const items = getLocalCartItems();
